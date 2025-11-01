@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monstrhay — For You</title>
+  <meta name="description" content="A private romantic space made with love">
+  
+  <!--
+    SECURITY NOTE:
+    This page uses CLIENT-SIDE JavaScript password protection.
+    This is NOT secure for protecting actual secrets - anyone can view
+    the source code and see the passwords. This is designed as a sweet,
+    private surprise, not a security system.
+    
+    To make this truly secure, you would need:
+    - Server-side authentication
+    - Encrypted data storage
+    - Proper user sessions
+    
+    For now, this provides a simple "lock" for a romantic gesture.
+  -->
+  
+  <style>
+    /* ===== CONFIGURATION: COLORS & STYLES ===== */
+    /* Edit these CSS variables to customize the look */
+    :root {
+      --bg-gradient-start: #1a0e2e;
+      --bg-gradient-end: #2d1b4e;
+      --accent-pink: #ff6b9d;
+      --accent-purple: #c44569;
+      --accent-gold: #ffd89b;
+      --text-primary: #ffffff;
+      --text-secondary: #e0d4f7;
+      --card-bg: rgba(255, 255, 255, 0.08);
+      --card-border: rgba(255, 255, 255, 0.18);
+      --glass-blur: blur(12px);
+      --shadow-glow: 0 8px 32px rgba(255, 107, 157, 0.15);
+    }
+    
+    /* ===== RESET & BASE ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      /* Background image with gradient overlay for readability. Replace 'background.jpg' with your image file. */
+      background-image: linear-gradient(135deg, rgba(26,14,46,0.65) 0%, rgba(45,27,78,0.65) 100%), url('2.jpg');
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      /* If you prefer the original solid gradient fallback, uncomment the next line and remove background-image above */
+      /* background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); */
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    
+    /* ===== CONTAINER & LAYOUT ===== */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    
+    /* ===== HEADER ===== */
+    header {
+      text-align: center;
+      padding: 2rem 0 3rem;
+      animation: fadeInDown 0.8s ease-out;
+    }
+    
+    header h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    
+    header p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+    
+    /* ===== TAB NAVIGATION ===== */
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeIn 1s ease-out 0.3s both;
+    }
+    
+    .tab-btn {
+      background: var(--card-bg);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--card-border);
+      color: var(--text-primary);
+      padding: 0.875rem 1.75rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .tab-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: -1;
+    }
+    
+    .tab-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-glow);
+      border-color: var(--accent-pink);
+    }
+    
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      border-color: transparent;
+      box-shadow: var(--shadow-glow);
+    }
+    
+    .tab-btn.locked::after {
+      content: '🔒';
+      margin-left: 0.5rem;
+    }
+    
+    .tab-btn.unlocked::after {
+      content: '✓';
+      margin-left: 0.5rem;
+      color: var(--accent-gold);
+    }
+    
+    /* ===== TAB PANELS ===== */
+    .tab-panel {
+      display: none;
+      animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .tab-panel.active {
+      display: block;
+    }
+    
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow-glow);
+      transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-4px);
+    }
+    
+    /* ===== HOME TAB ===== */
+    .home-content {
+      text-align: center;
+    }
+    
+    .typewriter-heading {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 600;
+      min-height: 3.5rem;
+      margin: 2rem 0;
+      color: var(--accent-gold);
+      overflow: hidden;
+      border-right: 3px solid var(--accent-pink);
+      white-space: nowrap;
+      display: inline-block;
+      animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+    }
+
+    /* Letter typing area styling */
+    .letter-typed p {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+      line-height: 1.9;
+      margin-bottom: 1rem;
+      white-space: pre-wrap;
+    }
+
+    /* Caret shown while typing on the active paragraph */
+    .letter-typed .typing-caret {
+      border-right: 3px solid var(--accent-pink);
+      padding-right: 0.2rem;
+      animation: blink-caret 0.8s step-end infinite;
+    }
+    
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+    
+    @keyframes blink-caret {
+      from, to { border-color: transparent; }
+      50% { border-color: var(--accent-pink); }
+    }
+    
+    .home-content p {
+      font-size: 1.125rem;
+      line-height: 1.8;
+      margin-top: 1.5rem;
+      color: var(--text-secondary);
+    }
+    
+    /* ===== LETTER TAB ===== */
+    .letter-content {
+      animation: slideInLeft 0.8s ease-out;
+    }
+    
+    .letter-content h2 {
+      color: var(--accent-pink);
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    
+    .letter-text {
+      font-size: 1.125rem;
+      line-height: 1.9;
+      color: var(--text-secondary);
+      text-align: left;
+    }
+    
+    .letter-text p {
+      margin-bottom: 1.5rem;
+    }
+    
+    .signature {
+      text-align: right;
+      margin-top: 2rem;
+      font-style: italic;
+      color: var(--accent-gold);
+      font-size: 1.25rem;
+    }
+    
+    /* ===== MUSIC TAB ===== */
+    .music-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .song-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .song-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--accent-pink);
+      transform: translateX(8px);
+    }
+    
+    .song-card h3 {
+      color: var(--accent-pink);
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .song-card p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .song-link {
+      color: var(--accent-gold);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: opacity 0.3s;
+    }
+    
+    .song-link:hover {
+      opacity: 0.8;
+    }
+    
+    /* ===== GALLERY TAB ===== */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    
+    .gallery-item {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+    
+    .gallery-item:hover {
+      transform: scale(1.05);
+    }
+    
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .gallery-item::after {
+      content: '🔍';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    
+    .gallery-item:hover::after {
+      opacity: 1;
+    }
+    
+    /* ===== LIGHTBOX ===== */
+    .lightbox {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 10000;
+      padding: 2rem;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .lightbox.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .lightbox-content {
+      max-width: 90%;
+      max-height: 90%;
+      position: relative;
+    }
+    
+    .lightbox img {
+      max-width: 100%;
+      max-height: 85vh;
+      border-radius: 8px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    
+    .lightbox-close {
+      position: absolute;
+      top: -3rem;
+      right: 0;
+      background: var(--accent-pink);
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    
+    .lightbox-close:hover {
+      transform: rotate(90deg);
+    }
+    
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--accent-pink);
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .lightbox-nav:hover {
+      background: var(--accent-purple);
+      transform: translateY(-50%) scale(1.1);
+    }
+    
+    .lightbox-prev {
+      left: -4rem;
+    }
+    
+    .lightbox-next {
+      right: -4rem;
+    }
+    
+    /* ===== PASSWORD MODAL ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 9999;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .modal-overlay.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal {
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      border: 2px solid var(--card-border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      animation: scaleIn 0.3s ease-out;
+    }
+    
+    .modal h2 {
+      color: var(--accent-pink);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    
+    .modal p {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    
+    .modal input {
+      width: 100%;
+      padding: 0.875rem;
+      border: 2px solid var(--card-border);
+      border-radius: 10px;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      transition: border-color 0.3s;
+    }
+    
+    .modal input:focus {
+      outline: none;
+      border-color: var(--accent-pink);
+    }
+    
+    .modal-buttons {
+      display: flex;
+      gap: 0.75rem;
+    }
+    
+    .modal-btn {
+      flex: 1;
+      padding: 0.875rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 600;
+    }
+    
+    .modal-btn-submit {
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      color: white;
+    }
+    
+    .modal-btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-glow);
+    }
+    
+    .modal-btn-cancel {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+    }
+    
+    .modal-btn-cancel:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .error-message {
+      color: #ff6b6b;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    
+    .error-message.active {
+      display: block;
+      animation: shake 0.5s;
+    }
+    
+    /* ===== FOOTER ===== */
+    footer {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+    
+    footer a {
+      color: var(--accent-gold);
+      text-decoration: none;
+      transition: opacity 0.3s;
+    }
+    
+    footer a:hover {
+      opacity: 0.8;
+    }
+    
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    /* Style for the centered password prompt */
+    .tab-panel {
+      position: relative;
+      min-height: 300px;
+    }
+    
+    .inline-password-prompt {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      border: 2px solid var(--card-border);
+      backdrop-filter: var(--glass-blur);
+    }
+
+    .inline-password-prompt input {
+      width: 100%;
+      padding: 0.875rem;
+      border: 2px solid var(--card-border);
+      border-radius: 10px;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      font-size: 1rem;
+      margin: 1rem 0;
+      transition: border-color 0.3s;
+    }
+
+    .inline-password-prompt input:focus {
+      outline: none;
+      border-color: var(--accent-pink);
+    }
+
+    .inline-password-prompt .button-group {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .inline-password-prompt button {
+      min-width: 120px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1.5rem 1rem;
+      }
+      
+      header {
+        padding: 1.5rem 0 2rem;
+      }
+      
+      .card {
+        padding: 1.5rem;
+      }
+      
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+      
+      .lightbox-prev {
+        left: 0.5rem;
+      }
+      
+      .lightbox-next {
+        right: 0.5rem;
+      }
+      
+      .lightbox-close {
+        top: -2rem;
+      }
+    }
+    /* When a tab panel shows an inline password prompt, hide the protected
+       content until the correct password is entered. The prompt itself uses
+       the .inline-password-prompt class (also a .card) so we only hide other
+       .card elements in the panel. */
+    .tab-panel.locked-with-prompt .card:not(.inline-password-prompt) {
+      display: none;
+    }
+
+    /* Play overlay shown when audible autoplay is blocked */
+    .play-overlay {
+      position: fixed;
+      inset: 0;
+      display: none; /* toggled by JS */
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.55);
+      z-index: 12000;
+      backdrop-filter: blur(4px);
+    }
+
+    .play-overlay .card {
+      max-width: 440px;
+      width: calc(100% - 48px);
+      text-align: center;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .play-overlay p {
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+
+    .play-overlay button {
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Happy 7th Motmot My Prettiest Baby Ali</h1>
+      <p>A special place, just for you ❤️</p>
+    </header>
+    
+    <!-- Tab Navigation -->
+    <nav class="tab-nav" role="tablist" aria-label="Main navigation">
+      <button class="tab-btn active" data-tab="home" role="tab" aria-selected="true" aria-controls="home-panel">
+        Home
+      </button>
+      <button class="tab-btn locked" data-tab="letter" data-password-required="true" role="tab" aria-selected="false" aria-controls="letter-panel">
+        Letter
+      </button>
+      <button class="tab-btn locked" data-tab="music" data-password-required="true" role="tab" aria-selected="false" aria-controls="music-panel">
+        Music
+      </button>
+      <button class="tab-btn locked" data-tab="gallery" data-password-required="true" role="tab" aria-selected="false" aria-controls="gallery-panel">
+        Gallery
+      </button>
+    </nav>
+    
+    <!-- Tab Panels -->
+    <main>
+      <!-- HOME TAB -->
+      <section id="home-panel" class="tab-panel active" role="tabpanel" aria-labelledby="home">
+        <div class="card home-content">
+          <div class="typewriter-heading">You mean everything to me ms pretty😍</div>
+          <p>Welcome to our little corner of the internet. This is a place I made just for you, filled with words, music, and memories that capture how much you mean to me.</p>
+          <p>Each tab is protected with a password I'll share with you. Take your time exploring—there's no rush. I hope this brings a smile to your face. ✨</p>
+        </div>
+      </section>
+      
+      <!-- LETTER TAB -->
+      <section id="letter-panel" class="tab-panel" role="tabpanel" aria-labelledby="letter">
+        <div class="card letter-content">
+          <h2>A Letter to You</h2>
+              <div class="letter-text">
+                <!-- The letter body will be typed into the element below when the Letter tab is opened/unlocked -->
+                <div id="letter-typed" class="letter-typed" aria-live="polite"></div>
+              </div>
+        </div>
+      </section>
+      
+      <!-- MUSIC TAB -->
+      <section id="music-panel" class="tab-panel" role="tabpanel" aria-labelledby="music">
+        <div class="card">
+          <h2 style="color: var(--accent-pink); text-align: center; margin-bottom: 1.5rem;">Our Soundtrack</h2>
+          <div class="music-list">
+            <!-- EDIT THIS: Replace with your favorite songs -->
+            <div class="song-card">
+              <h3>🎵 Dionela - Marilag </h3>
+              <p>This song reminds me of that perfect day we spent together, when everything just felt right. Every time I hear it, I think of you.</p>
+              <a href="https://www.youtube.com/watch?v=cHSRG1mGaAo&list=RDcHSRG1mGaAo&start_radio=1" target="_blank" class="song-link">
+                ▶ Listen on YouTube
+              </a>
+            </div>
+            
+            <div class="song-card">
+              <h3>🎵 By Chance (You & I)</h3>
+              <p>The lyrics of this one perfectly capture how I feel about us. It's become "our song" in my heart, even if we've never officially claimed it.</p>
+              <a href="https://www.youtube.com/watch?v=LsfzsBn18Rk&list=RDLsfzsBn18Rk&start_radio=1" target="_blank" class="song-link">
+                ▶ Listen on YouTube
+              </a>
+            </div>
+            
+            <div class="song-card">
+              <h3>🎵LANY - Out Of My League </h3>
+              <p>This one always makes me smile and think of your infectious laugh. It's impossible to listen to it without feeling happy.</p>
+              <a href="https://www.youtube.com/watch?v=mZcoOmGLp4M&list=RDmZcoOmGLp4M&start_radio=1" target="_blank" class="song-link">
+                ▶ Listen on YouTube
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- GALLERY TAB -->
+      <section id="gallery-panel" class="tab-panel" role="tabpanel" aria-labelledby="gallery">
+        <div class="card">
+          <h2 style="color: var(--accent-pink); text-align: center; margin-bottom: 1rem;">Our Moments</h2>
+          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 1rem;">Click any photo to view it larger</p>
+          <div class="gallery-grid">
+            <!-- EDIT THIS: Replace src with your own image URLs -->
+            <!-- You can use services like Imgur, Google Photos (shared links), or any image hosting -->
+            <div class="gallery-item" data-index="0">
+              <img src="1.jpg" alt="Our first adventure together">
+            </div>
+            <div class="gallery-item" data-index="1">
+              <img src="3.jpg" alt="That beautiful sunset we watched">
+            </div>
+            <div class="gallery-item" data-index="2">
+              <img src="4.jpg" alt="Your smile that day">
+            </div>
+            <div class="gallery-item" data-index="3">
+              <img src="5.jpg" alt="Us being silly together">
+            </div>
+            <div class="gallery-item" data-index="4">
+              <img src="6.jpg" alt="A moment I'll never forget">
+            </div>
+            <div class="gallery-item" data-index="5">
+              <img src="7.jpg" alt="Just another perfect day with you">
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+    <footer>
+      <p>Made with ❤️ for someone special</p>
+    </footer>
+  </div>
+  
+  <!-- Lightbox for Gallery -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+    <div class="lightbox-content">
+      <button class="lightbox-close" aria-label="Close lightbox">×</button>
+      <button class="lightbox-nav lightbox-prev" aria-label="Previous image">‹</button>
+      <img src="" alt="" id="lightbox-img">
+      <button class="lightbox-nav lightbox-next" aria-label="Next image">›</button>
+    </div>
+  </div>
+  
+  <!-- Password Modal -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <h2 id="modal-title">Enter Password</h2>
+      <p id="modal-description">This section is protected. Please enter the password to continue.</p>
+      <input type="password" id="password-input" placeholder="Password" aria-label="Password input" aria-describedby="error-message">
+      <div class="error-message" id="error-message" role="alert">Incorrect password. Please try again.</div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-cancel" id="modal-cancel">Cancel</button>
+        <button class="modal-btn modal-btn-submit" id="modal-submit">Unlock</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+  
+
+    const TAB_PASSWORDS = {
+      letter: "010625",   // ← CHANGE THIS
+      music: "112224",    // ← CHANGE THIS
+      gallery: "040225"   // ← CHANGE THIS
+    };
+
+    // Short clue for each protected tab. These are shown inline inside the tab
+    // to help the recipient guess the password without exposing it outright.
+    // Edit the clues as you like.
+    const CLUES = {
+      letter: "Hint: Date when I first gave you a DIY flower and had my first kiss on my cheek (MMDDYY)",
+      music: "Hint: When I sang “Marilag” and you noticed me (MMDDYY)",
+      gallery: "Hint: The day you said “yes” to me the start of us (MMDDYY)"
+    };
+    
+    // ========================================
+    // SESSION STORAGE KEYS
+    // ========================================
+    // Unlocked tabs are stored in sessionStorage (cleared when browser closes)
+    const STORAGE_PREFIX = "monstrhay_unlocked_";
+    
+    // ========================================
+    // STATE
+    // ========================================
+    let currentTab = "home";
+    let pendingTab = null;
+    let currentLightboxIndex = 0;
+    const galleryImages = [];
+    
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+    document.addEventListener("DOMContentLoaded", () => {
+      initTabs();
+      initModal();
+      initGallery();
+      initLightbox();
+      checkUnlockedTabs();
+      
+      // (Reset passwords link removed)
+    });
+    
+    // ========================================
+    // TAB MANAGEMENT
+    // ========================================
+    function initTabs() {
+      const tabButtons = document.querySelectorAll(".tab-btn");
+      
+      tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const targetTab = btn.dataset.tab;
+          const requiresPassword = btn.dataset.passwordRequired === "true";
+          // If the tab requires a password and isn't unlocked yet, show an
+          // inline prompt inside the tab panel (so the hint/clue can appear
+          // with the content). Otherwise switch immediately.
+          if (requiresPassword && !isTabUnlocked(targetTab)) {
+            pendingTab = targetTab;
+            // Switch to the tab panel and show the inline prompt there.
+            // Also mark the panel locked so its content is hidden until
+            // the correct password is entered.
+            const panelToLock = document.getElementById(`${targetTab}-panel`);
+            if (panelToLock) panelToLock.classList.add('locked-with-prompt');
+            switchTab(targetTab);
+            showInlinePrompt(targetTab);
+          } else {
+            switchTab(targetTab);
+          }
+        });
+      });
+    }
+
+    // ---- Inline prompt functions ----
+    function showInlinePrompt(tabName) {
+      const panel = document.getElementById(`${tabName}-panel`);
+      if (!panel) return;
+
+      // If a prompt already exists, focus its input
+      let prompt = panel.querySelector('.inline-password-prompt');
+      if (!prompt) {
+        prompt = document.createElement('div');
+        prompt.className = 'inline-password-prompt';
+        prompt.innerHTML = `
+          <h3 style="color: var(--accent-pink); font-size: 1.5rem; margin-bottom: 0.75rem;">Protected Section</h3>
+          <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 1rem;">${CLUES[tabName] || ''}</p>
+          <input type="password" class="inline-password-input" placeholder="Enter password to unlock" aria-label="Password for ${tabName}">
+          <div class="error-message inline-error" style="display: none; margin: 0.5rem 0;">Incorrect password. Please try again.</div>
+          <div class="button-group">
+            <button class="modal-btn modal-btn-submit inline-submit">Unlock</button>
+            <button class="modal-btn modal-btn-cancel inline-cancel">Back</button>
+          </div>
+        `;
+        // Insert prompt at the top of the panel
+        panel.prepend(prompt);
+
+        // Wire up handlers
+        const input = prompt.querySelector('.inline-password-input');
+        const submit = prompt.querySelector('.inline-submit');
+        const cancel = prompt.querySelector('.inline-cancel');
+        const error = prompt.querySelector('.inline-error');
+
+        submit.addEventListener('click', () => {
+          const entered = input.value;
+          const correct = TAB_PASSWORDS[tabName];
+          if (entered === correct) {
+            unlockTab(tabName);
+            // remove prompt and ensure panel remains visible
+            prompt.remove();
+            error.style.display = 'none';
+          } else {
+            error.style.display = 'block';
+            input.value = '';
+            input.focus();
+          }
+        });
+
+        cancel.addEventListener('click', () => {
+          // remove the prompt and go back to home
+          prompt.remove();
+          pendingTab = null;
+          switchTab('home');
+        });
+
+        input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') submit.click();
+        });
+      } else {
+        const input = prompt.querySelector('.inline-password-input');
+        input.focus();
+      }
+    }
+    
+    function switchTab(tabName) {
+      // Hide all panels
+      document.querySelectorAll(".tab-panel").forEach(panel => {
+        panel.classList.remove("active");
+      });
+      
+      // Show target panel
+      const targetPanel = document.getElementById(`${tabName}-panel`);
+      if (targetPanel) {
+        targetPanel.classList.add("active");
+      }
+      
+      // Update buttons
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.remove("active");
+        btn.setAttribute("aria-selected", "false");
+        
+        if (btn.dataset.tab === tabName) {
+          btn.classList.add("active");
+          btn.setAttribute("aria-selected", "true");
+        }
+      });
+      
+      currentTab = tabName;
+
+      // If entering the letter tab and it is unlocked, start the typing animation
+      if (tabName === 'letter' && isTabUnlocked('letter')) {
+        // run asynchronously to allow the panel to become visible first
+        setTimeout(() => startLetterTyping(), 100);
+      }
+    }
+    
+    function isTabUnlocked(tabName) {
+      return sessionStorage.getItem(STORAGE_PREFIX + tabName) === "true";
+    }
+    
+    function unlockTab(tabName) {
+      sessionStorage.setItem(STORAGE_PREFIX + tabName, "true");
+      
+      // Update button appearance
+      const btn = document.querySelector(`[data-tab="${tabName}"]`);
+      if (btn) {
+        btn.classList.remove("locked");
+        btn.classList.add("unlocked");
+      }
+      // Reveal the panel content if an inline prompt was present
+      const panel = document.getElementById(`${tabName}-panel`);
+      if (panel) {
+        panel.classList.remove('locked-with-prompt');
+        const prompt = panel.querySelector('.inline-password-prompt');
+        if (prompt) prompt.remove();
+      }
+
+      // If we just unlocked the letter tab and it's the active panel, start typing
+      if (tabName === 'letter' && currentTab === 'letter') {
+        setTimeout(() => startLetterTyping(), 120);
+      }
+    }
+    
+    function checkUnlockedTabs() {
+      // On page load, check which tabs are already unlocked
+      Object.keys(TAB_PASSWORDS).forEach(tab => {
+        if (isTabUnlocked(tab)) {
+          const btn = document.querySelector(`[data-tab="${tab}"]`);
+          if (btn) {
+            btn.classList.remove("locked");
+            btn.classList.add("unlocked");
+          }
+        }
+      });
+    }
+
+    // ========================================
+    // LETTER TYPING ANIMATION
+    // ========================================
+    const LETTER_PARAGRAPHS = [
+      "my dearest, prettiest, most lovable baby ali,",
+      "happy 7th monthsary, love! 🌷💗",
+      "grabe… seven months na tayo. sometimes it still amazes me how fast time moves when I’m with you. every single day with you feels like a soft, warm place I can always come home to. you’ve given my life so much color, peace, and joy more than I ever thought I’d get to feel.",
+      "from our late-night talks to the little moments we share, you’ve made me feel loved in the purest, gentlest ways. your presence soothes me, your laugh lifts me, and your love strengthens me. you understand me in ways I’ve never been understood before, and that’s something I treasure deeply. you are my comfort, my partner, my baby, my constant.",
+     "thank you for your patience with me, your sweetness, your efforts, and every little thing you do that makes my heart feel safe and full. life gets busy, stressful, and overwhelming sometimes, but somehow, thinking of you brings me back to calm. with you, everything feels lighter.",
+      "seven months might still be a beginning… but it’s a beginning I want to keep choosing every single day. let’s continue growing, dreaming, and loving together slowly, surely, beautifully.",
+      "i love you always, baby ali. happy motmot to us. 💗",
+      "yours forever,",
+      "enzo 🌷"
+    ];
+
+    let _letterState = {
+      inProgress: false,
+      completed: false
+    };
+
+    function startLetterTyping(force = false) {
+      const target = document.getElementById('letter-typed');
+      if (!target) return;
+      if (_letterState.completed && !force) return;
+      if (_letterState.inProgress && !force) return;
+
+      _letterState.inProgress = true;
+      target.innerHTML = '';
+
+      let paraIndex = 0;
+      const typingSpeed = 28; // ms per character
+
+      function typeParagraph() {
+        if (paraIndex >= LETTER_PARAGRAPHS.length) {
+          _letterState.inProgress = false;
+          _letterState.completed = true;
+          return;
+        }
+
+        const text = LETTER_PARAGRAPHS[paraIndex];
+  const p = document.createElement('p');
+  // Make the last two paragraphs (closing + signature) right-aligned
+  if (paraIndex >= LETTER_PARAGRAPHS.length - 2) p.className = 'signature';
+        target.appendChild(p);
+
+        let i = 0;
+        const typer = setInterval(() => {
+          p.textContent += text.charAt(i);
+          i++;
+          if (i >= text.length) {
+            clearInterval(typer);
+            paraIndex++;
+            // small pause between paragraphs
+            setTimeout(typeParagraph, 500);
+          }
+        }, typingSpeed);
+      }
+
+      // Allow user to click to finish instantly
+      function finishInstantly() {
+        if (!_letterState.inProgress) return;
+        _letterState.inProgress = false;
+        _letterState.completed = true;
+        target.innerHTML = '';
+        LETTER_PARAGRAPHS.forEach((t, idx) => {
+          const p = document.createElement('p');
+          // Right-align the closing lines (last two paragraphs)
+          if (idx >= LETTER_PARAGRAPHS.length - 2) p.className = 'signature';
+          p.textContent = t;
+          target.appendChild(p);
+        });
+        target.removeEventListener('click', finishInstantly);
+      }
+
+      target.addEventListener('click', finishInstantly);
+      typeParagraph();
+    }
+    
+    // ========================================
+    // PASSWORD MODAL
+    // ========================================
+    function initModal() {
+      const overlay = document.getElementById("modal-overlay");
+      const input = document.getElementById("password-input");
+      const submitBtn = document.getElementById("modal-submit");
+      const cancelBtn = document.getElementById("modal-cancel");
+      const errorMsg = document.getElementById("error-message");
+      
+      submitBtn.addEventListener("click", handlePasswordSubmit);
+      cancelBtn.addEventListener("click", hideModal);
+      
+      // Allow Enter key to submit
+      input.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          handlePasswordSubmit();
+        }
+      });
+      
+      // Close modal on overlay click
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) {
+          hideModal();
+        }
+      });
+    }
+    
+    function showModal(tabName) {
+      const overlay = document.getElementById("modal-overlay");
+      const input = document.getElementById("password-input");
+      const errorMsg = document.getElementById("error-message");
+      
+      input.value = "";
+      errorMsg.classList.remove("active");
+      overlay.classList.add("active");
+      
+      // Focus input for better UX
+      setTimeout(() => input.focus(), 100);
+    }
+    
+    function hideModal() {
+      const overlay = document.getElementById("modal-overlay");
+      overlay.classList.remove("active");
+      pendingTab = null;
+    }
+    
+    function handlePasswordSubmit() {
+      const input = document.getElementById("password-input");
+      const errorMsg = document.getElementById("error-message");
+      const enteredPassword = input.value;
+      
+      if (!pendingTab) return;
+      
+      const correctPassword = TAB_PASSWORDS[pendingTab];
+      
+      if (enteredPassword === correctPassword) {
+        // Correct password!
+        unlockTab(pendingTab);
+        hideModal();
+        switchTab(pendingTab);
+      } else {
+        // Wrong password
+        errorMsg.classList.add("active");
+        input.value = "";
+        input.focus();
+      }
+    }
+    
+    // ========================================
+    // GALLERY & LIGHTBOX
+    // ========================================
+    function initGallery() {
+      const items = document.querySelectorAll(".gallery-item");
+      
+      items.forEach((item, index) => {
+        const img = item.querySelector("img");
+        galleryImages.push({
+          src: img.src,
+          alt: img.alt
+        });
+        
+        item.addEventListener("click", () => {
+          openLightbox(index);
+        });
+      });
+    }
+    
+    function initLightbox() {
+      const lightbox = document.getElementById("lightbox");
+      const closeBtn = lightbox.querySelector(".lightbox-close");
+      const prevBtn = lightbox.querySelector(".lightbox-prev");
+      const nextBtn = lightbox.querySelector(".lightbox-next");
+      
+      closeBtn.addEventListener("click", closeLightbox);
+      prevBtn.addEventListener("click", () => navigateLightbox(-1));
+      nextBtn.addEventListener("click", () => navigateLightbox(1));
+      
+      // Close on overlay click
+      lightbox.addEventListener("click", (e) => {
+        if (e.target === lightbox) {
+          closeLightbox();
+        }
+      });
+      
+      // Keyboard navigation
+      document.addEventListener("keydown", (e) => {
+        if (!lightbox.classList.contains("active")) return;
+        
+        if (e.key === "Escape") {
+          closeLightbox();
+        } else if (e.key === "ArrowLeft") {
+          navigateLightbox(-1);
+        } else if (e.key === "ArrowRight") {
+          navigateLightbox(1);
+        }
+      });
+    }
+    
+    function openLightbox(index) {
+      currentLightboxIndex = index;
+      updateLightboxImage();
+      document.getElementById("lightbox").classList.add("active");
+      document.body.style.overflow = "hidden"; // Prevent background scrolling
+    }
+    
+    function closeLightbox() {
+      document.getElementById("lightbox").classList.remove("active");
+      document.body.style.overflow = ""; // Restore scrolling
+    }
+    
+    function navigateLightbox(direction) {
+      currentLightboxIndex += direction;
+      
+      // Wrap around
+      if (currentLightboxIndex < 0) {
+        currentLightboxIndex = galleryImages.length - 1;
+      } else if (currentLightboxIndex >= galleryImages.length) {
+        currentLightboxIndex = 0;
+      }
+      
+      updateLightboxImage();
+    }
+    
+    function updateLightboxImage() {
+      const img = document.getElementById("lightbox-img");
+      const currentImage = galleryImages[currentLightboxIndex];
+      
+      img.src = currentImage.src;
+      img.alt = currentImage.alt;
+    }
+  </script>
+  <!-- Background playlist: put three MP3s in the same folder and name them as below -->
+  <audio id="bg-music" preload="auto"></audio>
+
+  <!-- Note: play/pause button removed — audio will attempt autoplay on page load -->
+
+  <!-- Overlay shown when autoplay is blocked; user can tap to start audible playback -->
+  <div id="play-overlay" class="play-overlay" role="dialog" aria-modal="true" aria-label="Start music">
+    <div class="card">
+      <p>Tap to play our soundtrack</p>
+      <button id="play-overlay-btn">Play</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const audio = document.getElementById('bg-music');
+
+      // Playlist: place these files next to index.html (or change names here)
+      const playlist = [
+        'By Chance (You & i).mp3',
+        'December Avenue - Saksi Ang Langit (OFFICIAL LYRIC VIDEO).mp3',
+        'Pag-ibig ng ikaw at ako.mp3'
+      ];
+
+      let currentIndex = 0;
+      let isPlaying = false;
+
+      function loadTrack(index) {
+        if (!audio) return;
+        currentIndex = (index + playlist.length) % playlist.length;
+        audio.src = playlist[currentIndex];
+        audio.load();
+      }
+
+      function playCurrent() {
+        if (!audio) return Promise.resolve();
+        audio.volume = 0.5; // default volume
+        return audio.play().then(() => {
+          isPlaying = true;
+          return Promise.resolve();
+        }).catch(err => {
+          isPlaying = false;
+          return Promise.reject(err);
+        });
+      }
+
+      // Advance to next track and play
+      function nextTrack() {
+        currentIndex = (currentIndex + 1) % playlist.length;
+        loadTrack(currentIndex);
+        playCurrent().catch(() => {});
+      }
+
+      // When a track ends, go to the next track
+      audio.addEventListener('ended', () => {
+        nextTrack();
+      });
+
+      // Try to autoplay on load. Many browsers block autoplay with sound,
+      // so we attempt a muted autoplay first (which is allowed), then try
+      // to unmute. If unmuting is blocked, audio will stay muted but play.
+      function tryAutoplay() {
+        if (!audio) return;
+        loadTrack(currentIndex);
+
+          // Start muted to increase chance autoplay is allowed
+          audio.muted = true;
+          playCurrent().then(() => {
+            // Try to unmute after a short delay. This may still be blocked
+            // by browsers that require a user gesture — it's best-effort.
+            setTimeout(() => {
+              try {
+                audio.muted = false;
+                audio.volume = 0.5;
+              } catch (e) {
+                // ignore
+              }
+
+              // If playback is still paused or muted, show the overlay so the
+              // user can give a gesture to start audible playback.
+              const overlay = document.getElementById('play-overlay');
+              if (overlay) {
+                if (audio.paused || audio.muted) {
+                  overlay.style.display = 'flex';
+                } else {
+                  overlay.style.display = 'none';
+                }
+              }
+            }, 800);
+          }).catch(() => {
+            // Autoplay blocked even when muted — show overlay to let user start
+            const overlay = document.getElementById('play-overlay');
+            if (overlay) overlay.style.display = 'flex';
+          });
+      }
+
+      // Wire up overlay button to provide the required user gesture
+      document.addEventListener('DOMContentLoaded', () => {
+        tryAutoplay();
+        const overlay = document.getElementById('play-overlay');
+        const overlayBtn = document.getElementById('play-overlay-btn');
+        if (overlay && overlayBtn) {
+          overlayBtn.addEventListener('click', () => {
+            overlay.style.display = 'none';
+            try {
+              audio.muted = false;
+              audio.volume = 0.6;
+            } catch (e) {}
+            playCurrent().catch(() => {
+              // if play still fails, show overlay again
+              overlay.style.display = 'flex';
+            });
+          });
+
+          // Allow pressing Enter/Space to activate
+          overlay.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              overlayBtn.click();
+            }
+          });
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
